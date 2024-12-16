@@ -1,0 +1,8 @@
+{
+    "endpoint": "http://127.0.0.1:11434",
+    "model": "",
+    "extend_selection_max_tokens": "",
+    "extend_selection_system_prompt": "",
+    "edit_selection_max_new_tokens": "0",
+    "edit_selection_system_prompt": ""
+}

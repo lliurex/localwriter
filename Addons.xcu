@@ -3,7 +3,9 @@
     <node oor:name="OfficeMenuBar">
       <node oor:name="org.extension.sample.menubar" oor:op="replace">
         <prop oor:name="Title" oor:type="xs:string">
-          <value xml:lang="en-US">localwriter</value>
+          <value xml:lang="en-US">LocalWriterAI</value>
+          <value xml:lang="es">LocalWriterAI</value>
+          <value xml:lang="ca">LocalWriterAI</value>
         </prop>
         <prop oor:name="Context" oor:type="xs:string">
           <value>com.sun.star.text.TextDocument</value>
@@ -12,6 +14,8 @@
           <node oor:name="M1" oor:op="replace">
             <prop oor:name="Title">
               <value xml:lang="en-US">Extend Selection</value>
+              <value xml:lang="es">Extender Selección</value>
+              <value xml:lang="ca">Estendre Selecció</value>
             </prop>
             <prop oor:name="URL">
               <value>service:org.extension.sample.do?ExtendSelection</value>
@@ -23,6 +27,8 @@
            <node oor:name="M2" oor:op="replace">
             <prop oor:name="Title">
               <value xml:lang="en-US">Edit Selection</value>
+              <value xml:lang="es">Editar Selección</value>
+              <value xml:lang="ca">Editar Selecció</value>
             </prop>
             <prop oor:name="URL">
               <value>service:org.extension.sample.do?EditSelection</value>
@@ -34,6 +40,8 @@
             <node oor:name="M3" oor:op="replace">
             <prop oor:name="Title">
               <value xml:lang="en-US">Settings</value>
+              <value xml:lang="es">Configuración</value>
+              <value xml:lang="ca">Configuració</value>
             </prop>
             <prop oor:name="URL">
               <value>service:org.extension.sample.do?settings</value>
@@ -47,4 +55,3 @@
     </node>
   </node>
 </oor:component-data>
-

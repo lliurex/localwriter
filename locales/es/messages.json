@@ -1,0 +1,12 @@
+{
+    "settings": "Configuración",
+    "endpoint_url_port": "URL/Puerto del Endpoint:",
+    "model_required_ollama": "Modelo (Requerido por Ollama):",
+    "extend_selection_max_tokens": "Máximo de tokens para extender selección:",
+    "extend_selection_system_prompt": "Prompt del sistema para extender selección:",
+    "edit_selection_max_new_tokens": "Máximo de nuevos tokens para editar selección:",
+    "edit_selection_system_prompt": "Prompt del sistema para editar selección:",
+    "please_enter_edit_instructions": "Por favor, introduce las instrucciones de edición",
+    "input": "Entrada",
+    "error": "Error"
+}

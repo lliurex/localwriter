@@ -4,18 +4,19 @@ import officehelper
 import json
 import urllib.request
 import urllib.parse
+import os
+import locale
 from com.sun.star.task import XJobExecutor
 from com.sun.star.awt import MessageBoxButtons as MSG_BUTTONS
 import uno
-import os 
 from com.sun.star.beans import PropertyValue
 from com.sun.star.container import XNamed
 
-# The MainJob is a UNO component derived from unohelper.Base class
-# and also the XJobExecutor, the implemented interface
 class MainJob(unohelper.Base, XJobExecutor):
     def __init__(self, ctx):
         self.ctx = ctx
+        self.current_locale = self.detect_system_locale()
+        self.messages = self.load_messages()
         # handling different situations (inside LibreOffice or other process)
         try:
             self.sm = ctx.getServiceManager()
@@ -24,7 +25,50 @@ class MainJob(unohelper.Base, XJobExecutor):
             self.sm = ctx.ServiceManager
             self.desktop = self.ctx.getServiceManager().createInstanceWithContext(
                 "com.sun.star.frame.Desktop", self.ctx)
-    
+
+    def detect_system_locale(self):
+        """Detect system locale and return appropriate language code"""
+        try:
+            # First try: LANG environment variable
+            lang = os.environ.get('LANG')
+            if lang:
+                lang_code = lang.split('_')[0].lower()
+                if self.is_language_supported(lang_code):
+                    return lang_code
+
+            # Second try: Current locale
+            current_locale = locale.getlocale()[0]
+            if current_locale:
+                lang_code = current_locale.split('_')[0].lower()
+                if self.is_language_supported(lang_code):
+                    return lang_code
+
+        except Exception as e:
+            print(f"Error detecting locale: {e}")
+
+        # Fallback to English if detection fails or language not supported
+        return 'en'
+
+    def is_language_supported(self, lang_code):
+        """Check if we have translations for this language"""
+        if not lang_code:
+            return False
+        locale_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locales')
+        return os.path.exists(os.path.join(locale_dir, lang_code))
+
+    def load_messages(self):
+        """Load messages for the current locale"""
+        locale_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                 f"locales/{self.current_locale}/messages.json")
+        try:
+            with open(locale_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return {}  # Return empty dict if locale file not found
+
+    def get_message(self, key):
+        """Get a localized message"""
+        return self.messages.get(key, key)  # Return key as fallback if not found
 
     def get_config(self,key,default):
   
@@ -90,10 +134,6 @@ class MainJob(unohelper.Base, XJobExecutor):
             print(f"Error writing to {config_file_path}: {e}")
 
 
-    #retrieved from https://wiki.documentfoundation.org/Macros/General/IO_to_Screen
-    #License: Creative Commons Attribution-ShareAlike 3.0 Unported License,
-    #License: The Document Foundation  https://creativecommons.org/licenses/by-sa/3.0/
-    #begin sharealike section 
     def input_box(self,message, title="", default="", x=None, y=None):
         """ Shows dialog with input box.
             @param message message to show on the dialog
@@ -185,7 +225,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         dialog_model = create("com.sun.star.awt.UnoControlDialogModel")
         dialog.setModel(dialog_model)
         dialog.setVisible(False)
-        dialog.setTitle(title)
+        dialog.setTitle(self.get_message("settings"))
         dialog.setPosSize(0, 0, WIDTH, HEIGHT, SIZE)
         def add(name, type, x_, y_, width_, height_, props):
             model = dialog_model.createInstance("com.sun.star.awt.UnoControl" + type + "Model")
@@ -196,34 +236,34 @@ class MainJob(unohelper.Base, XJobExecutor):
                 setattr(model, key, value)
         label_width = WIDTH - BUTTON_WIDTH - HORI_SEP - HORI_MARGIN * 2
         add("label_endpoint", "FixedText", HORI_MARGIN, VERT_MARGIN, label_width, LABEL_HEIGHT, 
-            {"Label": "Endpoint URL/Port:", "NoLabel": True})
+            {"Label": self.get_message("endpoint_url_port"), "NoLabel": True})
         add("btn_ok", "Button", HORI_MARGIN + label_width + HORI_SEP, VERT_MARGIN, 
                 BUTTON_WIDTH, BUTTON_HEIGHT, {"PushButtonType": OK, "DefaultButton": True})
         add("edit_endpoint", "Edit", HORI_MARGIN, LABEL_HEIGHT,
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("endpoint","http://127.0.0.1:11434"))})
         
         add("label_model", "FixedText", HORI_MARGIN, LABEL_HEIGHT + VERT_MARGIN + VERT_SEP + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
-            {"Label": "Model(Required by Ollama):", "NoLabel": True})
+            {"Label": self.get_message("model_required_ollama"), "NoLabel": True})
         add("edit_model", "Edit", HORI_MARGIN, LABEL_HEIGHT*2 + VERT_MARGIN + VERT_SEP*2 + EDIT_HEIGHT, 
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("model",""))})
         
         add("label_extend_selection_max_tokens", "FixedText", HORI_MARGIN, LABEL_HEIGHT*3 + VERT_MARGIN + VERT_SEP*3 + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
-            {"Label": "Extend Selection Max Tokens:", "NoLabel": True})
+            {"Label": self.get_message("extend_selection_max_tokens"), "NoLabel": True})
         add("edit_extend_selection_max_tokens", "Edit", HORI_MARGIN, LABEL_HEIGHT*4 + VERT_MARGIN + VERT_SEP*4 + EDIT_HEIGHT, 
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("extend_selection_max_tokens","70"))})
         
         add("label_extend_selection_system_prompt", "FixedText", HORI_MARGIN, LABEL_HEIGHT*5 + VERT_MARGIN + VERT_SEP*5 + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
-            {"Label": "Extend Selection System Prompt:", "NoLabel": True})
+            {"Label": self.get_message("extend_selection_system_prompt"), "NoLabel": True})
         add("edit_extend_selection_system_prompt", "Edit", HORI_MARGIN, LABEL_HEIGHT*6 + VERT_MARGIN + VERT_SEP*6 + EDIT_HEIGHT, 
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("extend_selection_system_prompt",""))})
 
         add("label_edit_selection_max_new_tokens", "FixedText", HORI_MARGIN, LABEL_HEIGHT*7 + VERT_MARGIN + VERT_SEP*7 + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
-            {"Label": "Edit Selection Max New Tokens:", "NoLabel": True})
+            {"Label": self.get_message("edit_selection_max_new_tokens"), "NoLabel": True})
         add("edit_edit_selection_max_new_tokens", "Edit", HORI_MARGIN, LABEL_HEIGHT*8 + VERT_MARGIN + VERT_SEP*8 + EDIT_HEIGHT, 
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("edit_selection_max_new_tokens",""))})
 
         add("label_edit_selection_system_prompt", "FixedText", HORI_MARGIN, LABEL_HEIGHT*9 + VERT_MARGIN + VERT_SEP*9 + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
-            {"Label": "Edit Selection System Prompt:", "NoLabel": True})
+            {"Label": self.get_message("edit_selection_system_prompt"), "NoLabel": True})
         add("edit_edit_selection_system_prompt", "Edit", HORI_MARGIN, LABEL_HEIGHT*10 + VERT_MARGIN + VERT_SEP*10 + EDIT_HEIGHT, 
                 WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("edit_selection_system_prompt",""))})
 
@@ -276,7 +316,6 @@ class MainJob(unohelper.Base, XJobExecutor):
 
         dialog.dispose()
         return result
-    #end sharealike section 
 
     def trigger(self, args):
         desktop = self.ctx.ServiceManager.createInstanceWithContext(
@@ -352,7 +391,8 @@ class MainJob(unohelper.Base, XJobExecutor):
         elif args == "EditSelection":
             # Access the current selection
             try:
-                user_input= self.input_box("Please enter edit instructions!", "Input", "")
+                user_input= self.input_box(self.get_message("please_enter_edit_instructions"), 
+                                          self.get_message("input"), "")
                 #text_range.setString(text_range.getString() + ": " + user_input)
                 url = self.get_config("endpoint", "http://127.0.0.1:5000") + "/v1/completions" 
 
@@ -407,7 +447,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         elif args == "settings":
             try:
 
-                result = self.settings_box("Settings")
+                result = self.settings_box(self.get_message("settings"))
                                 
                 if "extend_selection_max_tokens" in result:
                     self.set_config("extend_selection_max_tokens", result["extend_selection_max_tokens"])
