@@ -12,6 +12,8 @@ import uno
 from com.sun.star.beans import PropertyValue
 from com.sun.star.container import XNamed
 
+# The MainJob is a UNO component derived from unohelper.Base class
+# and also the XJobExecutor, the implemented interface
 class MainJob(unohelper.Base, XJobExecutor):
     def __init__(self, ctx):
         self.ctx = ctx
@@ -134,6 +136,10 @@ class MainJob(unohelper.Base, XJobExecutor):
             print(f"Error writing to {config_file_path}: {e}")
 
 
+    #retrieved from https://wiki.documentfoundation.org/Macros/General/IO_to_Screen
+    #License: Creative Commons Attribution-ShareAlike 3.0 Unported License,
+    #License: The Document Foundation  https://creativecommons.org/licenses/by-sa/3.0/
+    #begin sharealike section 
     def input_box(self,message, title="", default="", x=None, y=None):
         """ Shows dialog with input box.
             @param message message to show on the dialog
@@ -317,6 +323,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         dialog.dispose()
         return result
 
+    #end sharealike section     
     def trigger(self, args):
         desktop = self.ctx.ServiceManager.createInstanceWithContext(
             "com.sun.star.frame.Desktop", self.ctx)
