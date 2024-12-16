@@ -200,7 +200,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         add("btn_ok", "Button", HORI_MARGIN + label_width + HORI_SEP, VERT_MARGIN, 
                 BUTTON_WIDTH, BUTTON_HEIGHT, {"PushButtonType": OK, "DefaultButton": True})
         add("edit_endpoint", "Edit", HORI_MARGIN, LABEL_HEIGHT,
-                WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("endpoint","http://127.0.0.1:5000"))})
+                WIDTH - HORI_MARGIN * 2, EDIT_HEIGHT, {"Text": str(self.get_config("endpoint","http://127.0.0.1:11434"))})
         
         add("label_model", "FixedText", HORI_MARGIN, LABEL_HEIGHT + VERT_MARGIN + VERT_SEP + EDIT_HEIGHT, label_width, LABEL_HEIGHT, 
             {"Label": "Model(Required by Ollama):", "NoLabel": True})
@@ -242,7 +242,7 @@ class MainJob(unohelper.Base, XJobExecutor):
         dialog.setPosSize(_x, _y, 0, 0, POS)
         
         edit_endpoint = dialog.getControl("edit_endpoint")
-        edit_endpoint.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("endpoint","http://127.0.0.1:5000")))))
+        edit_endpoint.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("endpoint","http://127.0.0.1:11434")))))
         
         edit_model = dialog.getControl("edit_model")
         edit_model.setSelection(uno.createUnoStruct("com.sun.star.awt.Selection", 0, len(str(self.get_config("model","")))))
