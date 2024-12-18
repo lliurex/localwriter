@@ -55,8 +55,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="135.41094"
-     inkscape:cy="60.457628"
+     inkscape:cx="245.01249"
+     inkscape:cy="54.093667"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -79,7 +79,13 @@
      inkscape:label="Capa 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-267.89581)"><image
+     transform="translate(0,-267.89581)"><rect
+       style="fill:#ffffff;stroke-width:0.516811;stroke:none"
+       id="rect2"
+       width="62.177082"
+       height="29.104166"
+       x="0"
+       y="267.89581" /><image
        width="27.516665"
        height="27.516665"
        preserveAspectRatio="none"
