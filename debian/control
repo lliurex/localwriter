@@ -1,4 +1,4 @@
-Source: localwritterai
+Source: localwriterai
 Section: x11
 Priority: optional
 Maintainer: LliureX Team <lliurex@gva.es>
@@ -7,9 +7,9 @@ Standards-Version: 4.1.2
 Homepage: https://lliurex.net
 Vcs-Git: https://github.com/lliurex/localwritter
 
-Package: localwritterai
+Package: localwriterai
 Architecture: all
 Depends: libreoffice,epi-gtk
-Description:  localwritter Libreoffice extension
+Description:  localwriter Libreoffice extension
         A LibreOffice Writer extension for local generative AI
 
