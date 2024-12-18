@@ -1,0 +1,11 @@
+Accelerators.xcu	/usr/lib/libreoffice/share/extensions/localwritter
+Addons.xcu	/usr/lib/libreoffice/share/extensions/localwritter
+assets	/usr/lib/libreoffice/share/extensions/localwritter
+description.xml	/usr/lib/libreoffice/share/extensions/localwritter
+locales	/usr/lib/libreoffice/share/extensions/localwritter
+localwriter.json	/usr/lib/libreoffice/share/extensions/localwritter
+LocalWriter.oxt	/usr/lib/libreoffice/share/extensions/localwritter
+main.py	/usr/lib/libreoffice/share/extensions/localwritter
+META-INF	/usr/lib/libreoffice/share/extensions/localwritter
+README.md	/usr/lib/libreoffice/share/extensions/localwritter
+registration	/usr/lib/libreoffice/share/extensions/localwritter
