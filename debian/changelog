@@ -1,3 +1,9 @@
+localwriterai (0.1.1) jammy; urgency=medium
+
+  * Added white background to zero-center banner
+
+ -- Hector Garcia Huerta <hectorgh@gmail.com>  Wed, 18 Dec 2024 10:26:24 +0100
+
 localwriterai (0.1) jammy; urgency=medium
 
   * Initial release.
