@@ -1,0 +1,7 @@
+{
+	"type":"apt",
+	"pkg_list": [{"name":"localwriterai","key_store":"zero-lliurex-localwriterai","custom_name":"localwriter: A LibreOffice Writer extension for local generative AI","custom_icon":"localwriterai.svg"}], 
+	"script": {"name":"/usr/share/zero-lliurex-localwriterai/localwriterai_script","remove":true},
+	"custom_icon_path":"/usr/share/zero-lliurex-localwriterai/",
+	"zomando":"zero-lliurex-localwriterai"
+	}

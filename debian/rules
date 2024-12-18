@@ -15,5 +15,5 @@
 
 
 %:
-	dh $@ 
+	dh $@ --with zero,llxsrc 
 
