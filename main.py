@@ -329,75 +329,38 @@ class MainJob(unohelper.Base, XJobExecutor):
         try:
             print("Starting show_help")
 
-            # Create frame for HTML content
-            frame = self.sm.createInstanceWithContext("com.sun.star.frame.Frame", self.ctx)
-            window = self.sm.createInstanceWithContext("com.sun.star.awt.Window", self.ctx)
-            
-            # Configure window
-            toolkit = self.sm.createInstanceWithContext("com.sun.star.awt.Toolkit", self.ctx)
-            rect = uno.createUnoStruct("com.sun.star.awt.Rectangle")
-            rect.X = 100
-            rect.Y = 50
-            rect.Width = 600
-            rect.Height = 700
-
-            # Create window with parameters
-            window_descriptor = uno.createUnoStruct("com.sun.star.awt.WindowDescriptor")
-            window_descriptor.Type = uno.Enum("com.sun.star.awt.WindowClass", "TOP")
-            window_descriptor.WindowServiceName = "window"
-            window_descriptor.ParentIndex = -1
-            window_descriptor.Parent = None
-            window_descriptor.Bounds = rect
-            window_descriptor.WindowAttributes = 1
-
-            # Create the window
-            window = toolkit.createWindow(window_descriptor)
-            frame.initialize(window)
-            frame.setName("HelpFrame")
-
             # Get the help content path
             help_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "help.html")
+            if not os.path.exists(help_file_path):
+                raise FileNotFoundError(f"Help file not found at {help_file_path}")
             help_url = uno.systemPathToFileUrl(help_file_path)
 
-            # Load the HTML content
-            frame.loadURL(help_url, (), ())
-            window.setVisible(True)
+            # Load the HTML content using the desktop
+            desktop = self.sm.createInstanceWithContext("com.sun.star.frame.Desktop", self.ctx)
+            
+            # Set up properties for read-only and hidden loading
+            properties = (
+                PropertyValue(Name="Hidden", Value=True),
+                PropertyValue(Name="ReadOnly", Value=True)
+            )
+            
+            # Load the document
+            component = desktop.loadComponentFromURL(help_url, "_blank", 0, properties)
+            
+            if component:
+                # Get the component window and adjust its size
+                frame = component.getCurrentController().getFrame()
+                doc_window = frame.getContainerWindow()
+                
+                # Set position and size (15 is the combination of POS and SIZE flags)
+                doc_window.setPosSize(100, 50, 600, 700, 15)
+                
+                # Show the window
+                doc_window.setVisible(True)
 
-            # Create close button window
-            button_rect = uno.createUnoStruct("com.sun.star.awt.Rectangle")
-            button_rect.X = (rect.Width - 80) // 2
-            button_rect.Y = rect.Height - 40
-            button_rect.Width = 80
-            button_rect.Height = 25
-
-            button_descriptor = uno.createUnoStruct("com.sun.star.awt.WindowDescriptor")
-            button_descriptor.Type = uno.Enum("com.sun.star.awt.WindowClass", "SIMPLE")
-            button_descriptor.WindowServiceName = "pushbutton"
-            button_descriptor.ParentIndex = -1
-            button_descriptor.Parent = window
-            button_descriptor.Bounds = button_rect
-
-            button = toolkit.createWindow(button_descriptor)
-            button.setModel(self.sm.createInstanceWithContext(
-                "com.sun.star.awt.UnoControlButtonModel", self.ctx))
-            button.Model.Label = "Close"
-            button.setVisible(True)
-
-            # Event listener for close button
-            class CloseListener(unohelper.Base, uno.getTypeByName("com.sun.star.awt.XActionListener")):
-                def __init__(self, frame, window):
-                    self.frame = frame
-                    self.window = window
-
-                def actionPerformed(self, event):
-                    self.frame.dispose()
-                    self.window.dispose()
-
-                def disposing(self, event):
-                    pass
-
-            # Add listener to close button
-            button.addActionListener(CloseListener(frame, window))
+                print("Help window displayed successfully")
+            else:
+                print("Failed to load help content")
 
         except Exception as e:
             print(f"Error showing help: {e}")
