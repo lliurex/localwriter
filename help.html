@@ -1,78 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>LocalWriterAI Help</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda del Plugin LocalWriterAI</title>
     <style>
         body {
-            font-family: sans-serif;
-            margin: 20px;
+            font-family: Arial, sans-serif;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
             color: #333;
-            background-color: #ffffff;
         }
-        h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+        header {
+            background-color: #0078d4;
+            color: white;
+            padding: 1rem 0;
             text-align: center;
         }
-        h2 {
-            color: #34495e;
-            margin-top: 30px;
-            padding-bottom: 5px;
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .feature {
-            background-color: #f8f9fa;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        .tips {
-            background-color: #f0f7fb;
-            border: 1px solid #d0e3ef;
-            padding: 15px;
-            margin-top: 30px;
+        h1, h2 {
+            color: #0078d4;
         }
         ul {
-            margin: 10px 0;
+            list-style: disc;
             padding-left: 20px;
         }
-        li {
-            margin: 8px 0;
+        a {
+            color: #0078d4;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>LocalWriterAI</h1>
-    
-    <h2>Características</h2>
-    <div class="feature">
-        <h3>Extender Selección</h3>
-        <p>Esta función te permite expandir tu selección actual de texto con contenido generado por IA que coincide con el contexto y estilo de tu documento.</p>
-    </div>
-    
-    <div class="feature">
-        <h3>Editar Selección</h3>
-        <p>Selecciona texto y usa esta opción para que la IA te ayude a editar y mejorar el contenido seleccionado mientras mantiene tu mensaje original.</p>
-    </div>
-    
-    <div class="feature">
-        <h3>Configuración</h3>
-        <p>Configura tus preferencias de LocalWriterAI, incluyendo la configuración de la API y las opciones de idioma.</p>
-    </div>
+    <header>
+        <h1>Ayuda del Plugin LocalWriterAI</h1>
+    </header>
+    <main>
+        <h2>Introducción</h2>
+        <p>El plugin <strong>LocalWriterAI</strong> integra funcionalidades de inteligencia artificial generativa directamente en LibreOffice Writer, facilitando la generación y edición de textos. Antes de utilizarlo, es necesario realizar configuraciones previas en tu equipo.</p>
 
-    <div class="tips">
-        <h2>Consejos de Uso</h2>
+        <h2>Pasos Previos para Utilizar LocalWriterAI</h2>
+
+        <h3>1. Instalar Ollama</h3>
+        <p><strong>Ollama</strong> es una plataforma versátil que permite ejecutar modelos de lenguaje de gran tamaño (LLMs) localmente en tu equipo. Para instalarlo en LliureX, sigue estos pasos:</p>
         <ul>
-            <li>Selecciona el texto antes de usar las funciones de Extender o Editar</li>
-            <li>Asegúrate de que la configuración de la API esté correctamente configurada</li>
-            <li>La extensión funciona mejor con selecciones claras y específicas</li>
+            <li>Abre <strong>Zero Center</strong> desde el menú de aplicaciones de LliureX.</li>
+            <li>Busca <strong>Ollama</strong> y sigue las indicaciones para instalarlo.</li>
+            <li>Verifica la instalación ejecutando <code>ollama --version</code> en la terminal (<strong>konsole</strong>).</li>
         </ul>
-    </div>
 
-    <p style="text-align: center; margin-top: 30px;">
-        <a href="https://github.com/your-repo/localwriter" target="_blank">Más información</a>
-    </p>
+        <h3>2. Descargar un Modelo LLM</h3>
+        <p>Una vez instalado Ollama, es necesario descargar un modelo de lenguaje, como por ejemplo <strong>Qwen2.5</strong>. Esto se realiza desde la terminal:</p>
+        <ul>
+            <li>Abre <strong>konsole</strong> y escribe: <code>ollama pull qwen2.5</code>.</li>
+            <li>Alternativamente, puedes explorar otros modelos disponibles en la <a href="https://ollama.ai/library" target="_blank">librería oficial de Ollama</a>.</li>
+            <li>Verifica que el servidor esté activo ingresando <a href="http://127.0.0.1:11434" target="_blank">http://127.0.0.1:11434</a> en tu navegador.</li>
+        </ul>
+
+        <h3>3. Configurar LocalWriterAI en LibreOffice Writer</h3>
+        <p>Tras instalar el plugin desde <strong>Zero Center</strong>, sigue estos pasos para configurarlo:</p>
+        <ul>
+            <li>Asegúrate de que el servidor de Ollama esté activo.</li>
+            <li>Abre LibreOffice Writer y accede al menú <strong>LocalWriterAI > Configuración</strong>.</li>
+            <li>Introduce la URL del servidor: <code>http://127.0.0.1:11434</code>, selecciona el modelo (<code>qwen2.5</code>) y ajusta los límites de tokens según tus necesidades.</li>
+        </ul>
+
+        <h2>Ejemplos de Uso de LocalWriterAI</h2>
+
+        <h3>Extender Selección</h3>
+        <p>Selecciona un fragmento de texto en tu documento y utiliza la opción para generar contenido adicional relacionado con el texto seleccionado.</p>
+        <p><strong>Ejemplo:</strong> «La Revolución Industrial fue un periodo de grandes avances tecnológicos y sociales que...»</p>
+
+        <h3>Editar Selección</h3>
+        <p>Selecciona un texto y proporciona instrucciones para modificarlo, como cambiar el tono, traducir o resumir.</p>
+        <p><strong>Ejemplo:</strong> Cambiar el tono de una carta informal a uno formal.</p>
+
+        <h2>Conclusión</h2>
+        <p>Integrar herramientas como <strong>Ollama</strong> y <strong>LocalWriterAI</strong> en LliureX mejora significativamente tu productividad, permitiéndote aprovechar las tecnologías de IA de forma eficiente y privada. 🚀</p>
+    </main>
 </body>
 </html>
