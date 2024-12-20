@@ -9,13 +9,13 @@ Vcs-Git: https://github.com/lliurex/localwritter
 
 Package: localwriterai
 Architecture: all
-Depends: libreoffice,epi-gtk
+Depends: libreoffice-writer
 Description:  localwriter Libreoffice extension
         A LibreOffice Writer extension for local generative AI
 
 Package: zero-lliurex-localwriterai
 Architecture: all
-Depends: zero-center
+Depends: zero-center, epi-gtk
 Description:  localwriterAI zero-center installer
         localwriterAI installer using zero-center
 
