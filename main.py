@@ -324,22 +324,74 @@ class MainJob(unohelper.Base, XJobExecutor):
         return result
 
     #end sharealike section     
+    def show_help(self):
+        """Show help dialog with HTML content"""
+        try:
+            print("Starting show_help")
+
+            # Get the help content path based on locale
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Try localized help first
+            help_file_path = os.path.join(base_dir, "locales", self.current_locale, "help.html")
+            
+            # If localized help doesn't exist, fall back to default
+            if not os.path.exists(help_file_path):
+                help_file_path = os.path.join(base_dir, "help.html")
+                
+            if not os.path.exists(help_file_path):
+                raise FileNotFoundError(f"Help file not found at {help_file_path}")
+                
+            help_url = uno.systemPathToFileUrl(help_file_path)
+
+            # Load the HTML content using the desktop
+            desktop = self.sm.createInstanceWithContext("com.sun.star.frame.Desktop", self.ctx)
+            
+            # Set up properties for read-only and hidden loading
+            properties = (
+                PropertyValue(Name="Hidden", Value=True),
+                PropertyValue(Name="ReadOnly", Value=True)
+            )
+            
+            # Load the document
+            component = desktop.loadComponentFromURL(help_url, "_blank", 0, properties)
+            
+            if component:
+                # Get the component window and adjust its size
+                frame = component.getCurrentController().getFrame()
+                doc_window = frame.getContainerWindow()
+                
+                # Set position and size (15 is the combination of POS and SIZE flags)
+                doc_window.setPosSize(100, 50, 600, 700, 15)
+                
+                # Show the window
+                doc_window.setVisible(True)
+
+                print(f"Help window displayed successfully using {help_file_path}")
+            else:
+                print("Failed to load help content")
+
+        except Exception as e:
+            print(f"Error showing help: {e}")
+            import traceback
+            traceback.print_exc()
+
     def trigger(self, args):
-        desktop = self.ctx.ServiceManager.createInstanceWithContext(
-            "com.sun.star.frame.Desktop", self.ctx)
-        model = desktop.getCurrentComponent()
-        if not hasattr(model, "Text"):
-            model = self.desktop.loadComponentFromURL("private:factory/swriter", "_blank", 0, ())
-        text = model.Text
-        selection = model.CurrentController.getSelection()
-        text_range = selection.getByIndex(0)
+        """Handle menu item triggers"""
+        try:
+            print(f"Trigger called with args: {args}")  # Debug print
+            if args == "ExtendSelection":
+                # Access the current selection
+                #selection = model.CurrentController.getSelection()
+                desktop = self.ctx.ServiceManager.createInstanceWithContext(
+                    "com.sun.star.frame.Desktop", self.ctx)
+                model = desktop.getCurrentComponent()
+                if not hasattr(model, "Text"):
+                    model = self.desktop.loadComponentFromURL("private:factory/swriter", "_blank", 0, ())
+                text = model.Text
+                selection = model.CurrentController.getSelection()
+                text_range = selection.getByIndex(0)
 
-
-
-        if args == "ExtendSelection":
-            # Access the current selection
-            #selection = model.CurrentController.getSelection()
-            if len(text_range.getString()) > 0:
                 # Get the first range of the selection
                 #text_range = selection.getByIndex(0)
                 try:
@@ -395,90 +447,109 @@ class MainJob(unohelper.Base, XJobExecutor):
                     # Append the user input to the selected text
                     text_range.setString(text_range.getString() + ": " + str(e))
 
-        elif args == "EditSelection":
-            # Access the current selection
-            try:
-                user_input= self.input_box(self.get_message("please_enter_edit_instructions"), 
-                                          self.get_message("input"), "")
-                #text_range.setString(text_range.getString() + ": " + user_input)
-                url = self.get_config("endpoint", "http://127.0.0.1:5000") + "/v1/completions" 
+            elif args == "EditSelection":
+                # Access the current selection
+                try:
+                    desktop = self.ctx.ServiceManager.createInstanceWithContext(
+                        "com.sun.star.frame.Desktop", self.ctx)
+                    model = desktop.getCurrentComponent()
+                    if not hasattr(model, "Text"):
+                        model = self.desktop.loadComponentFromURL("private:factory/swriter", "_blank", 0, ())
+                    text = model.Text
+                    selection = model.CurrentController.getSelection()
+                    text_range = selection.getByIndex(0)
+                    user_input= self.input_box(self.get_message("please_enter_edit_instructions"), 
+                                              self.get_message("input"), "")
+                    #text_range.setString(text_range.getString() + ": " + user_input)
+                    url = self.get_config("endpoint", "http://127.0.0.1:5000") + "/v1/completions" 
 
-                headers = {
-                    'Content-Type': 'application/json'
-                }
+                    headers = {
+                        'Content-Type': 'application/json'
+                    }
 
-                prompt =  "ORIGINAL VERSION:\n" + text_range.getString() + "\n Below is an edited version according to the following instructions. There are no comments in the edited version. The edited version is followed by the end of the document: \n" + user_input + "\nEDITED VERSION:\n"
+                    prompt =  "ORIGINAL VERSION:\n" + text_range.getString() + "\n Below is an edited version according to the following instructions. There are no comments in the edited version. The edited version is followed by the end of the document: \n" + user_input + "\nEDITED VERSION:\n"
 
-                if self.get_config("edit_selection_system_prompt", "") != "":
-                    prompt = "SYSTEM PROMPT\n" + self.get_config("edit_selection_system_prompt","") + "\nEND SYSTEM PROMPT\n" + prompt
-
-
-                data = {
-                    'prompt':prompt,
-                    'max_tokens': len(text_range.getString()) + self.get_config("edit_selection_max_new_tokens", 0), # this is a bit hacky, it's actually number of characters + max new tokens, so even if max new tokens is zero, max_tokens will often end up with more tokens than the selected text actually contains.
-                    'temperature': 1,
-                    'top_p': 0.9,
-                    'seed': 10
-                }
-
-                model = self.get_config("model", "")
-                if model != "":
-                    data["model"] = model
-
-                # Convert data to JSON format
-                json_data = json.dumps(data).encode('utf-8')
-
-                # Create a request object with the URL, data, and headers
-                request = urllib.request.Request(url, data=json_data, headers=headers, method='POST')
-
-                # Send the request and read the response
-                with urllib.request.urlopen(request) as response:
-                    response_data = response.read()
-
-                # If needed, decode the response data
-                response = json.loads(response_data.decode('utf-8'))
+                    if self.get_config("edit_selection_system_prompt", "") != "":
+                        prompt = "SYSTEM PROMPT\n" + self.get_config("edit_selection_system_prompt","") + "\nEND SYSTEM PROMPT\n" + prompt
 
 
-                # Append completion to selection
-                selected_text = text_range.getString()
-                new_text = response["choices"][0]["text"]
+                    data = {
+                        'prompt':prompt,
+                        'max_tokens': len(text_range.getString()) + self.get_config("edit_selection_max_new_tokens", 0), # this is a bit hacky, it's actually number of characters + max new tokens, so even if max new tokens is zero, max_tokens will often end up with more tokens than the selected text actually contains.
+                        'temperature': 1,
+                        'top_p': 0.9,
+                        'seed': 10
+                    }
 
-                # Set the new text
-                text_range.setString(new_text)
+                    model = self.get_config("model", "")
+                    if model != "":
+                        data["model"] = model
 
-            except Exception as e:
-                text_range = selection.getByIndex(0)
-                # Append the user input to the selected text
-                text_range.setString(text_range.getString() + ": " + str(e))
+                    # Convert data to JSON format
+                    json_data = json.dumps(data).encode('utf-8')
+
+                    # Create a request object with the URL, data, and headers
+                    request = urllib.request.Request(url, data=json_data, headers=headers, method='POST')
+
+                    # Send the request and read the response
+                    with urllib.request.urlopen(request) as response:
+                        response_data = response.read()
+
+                    # If needed, decode the response data
+                    response = json.loads(response_data.decode('utf-8'))
+
+
+                    # Append completion to selection
+                    selected_text = text_range.getString()
+                    new_text = response["choices"][0]["text"]
+
+                    # Set the new text
+                    text_range.setString(new_text)
+
+                except Exception as e:
+                    text_range = selection.getByIndex(0)
+                    # Append the user input to the selected text
+                    text_range.setString(text_range.getString() + ": " + str(e))
         
-        elif args == "settings":
-            try:
+            elif args == "settings":
+                try:
 
-                result = self.settings_box(self.get_message("settings"))
+                    result = self.settings_box(self.get_message("settings"))
                                 
-                if "extend_selection_max_tokens" in result:
-                    self.set_config("extend_selection_max_tokens", result["extend_selection_max_tokens"])
+                    if "extend_selection_max_tokens" in result:
+                        self.set_config("extend_selection_max_tokens", result["extend_selection_max_tokens"])
 
-                if "extend_selection_system_prompt" in result:
-                    self.set_config("extend_selection_system_prompt", result["extend_selection_system_prompt"])
+                    if "extend_selection_system_prompt" in result:
+                        self.set_config("extend_selection_system_prompt", result["extend_selection_system_prompt"])
 
-                if "edit_selection_max_new_tokens" in result:
-                    self.set_config("edit_selection_max_new_tokens", result["edit_selection_max_new_tokens"])
+                    if "edit_selection_max_new_tokens" in result:
+                        self.set_config("edit_selection_max_new_tokens", result["edit_selection_max_new_tokens"])
 
-                if "edit_selection_system_prompt" in result:
-                    self.set_config("edit_selection_system_prompt", result["edit_selection_system_prompt"])
+                    if "edit_selection_system_prompt" in result:
+                        self.set_config("edit_selection_system_prompt", result["edit_selection_system_prompt"])
 
-                if "endpoint" in result and result["endpoint"].startswith("http"):
-                    self.set_config("endpoint", result["endpoint"])
+                    if "endpoint" in result and result["endpoint"].startswith("http"):
+                        self.set_config("endpoint", result["endpoint"])
 
-                if "model" in result:                
-                    self.set_config("model", result["model"])
+                    if "model" in result:                
+                        self.set_config("model", result["model"])
 
 
-            except Exception as e:
-                text_range = selection.getByIndex(0)
-                # Append the user input to the selected text
-                text_range.setString(text_range.getString() + ":error: " + str(e))
+                except Exception as e:
+                    text_range = selection.getByIndex(0)
+                    # Append the user input to the selected text
+                    text_range.setString(text_range.getString() + ":error: " + str(e))
+
+            elif args == "help":
+                print("Showing help dialog")  # Debug print
+                self.show_help()
+
+            else:
+                print(f"Unknown command: {args}")  # Debug print
+        except Exception as e:
+            print(f"Error in trigger: {e}")
+            import traceback
+            traceback.print_exc()
 
 # Starting from Python IDE
 def main():
