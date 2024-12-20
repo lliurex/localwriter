@@ -329,10 +329,19 @@ class MainJob(unohelper.Base, XJobExecutor):
         try:
             print("Starting show_help")
 
-            # Get the help content path
-            help_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "help.html")
+            # Get the help content path based on locale
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Try localized help first
+            help_file_path = os.path.join(base_dir, "locales", self.current_locale, "help.html")
+            
+            # If localized help doesn't exist, fall back to default
+            if not os.path.exists(help_file_path):
+                help_file_path = os.path.join(base_dir, "help.html")
+                
             if not os.path.exists(help_file_path):
                 raise FileNotFoundError(f"Help file not found at {help_file_path}")
+                
             help_url = uno.systemPathToFileUrl(help_file_path)
 
             # Load the HTML content using the desktop
@@ -358,7 +367,7 @@ class MainJob(unohelper.Base, XJobExecutor):
                 # Show the window
                 doc_window.setVisible(True)
 
-                print("Help window displayed successfully")
+                print(f"Help window displayed successfully using {help_file_path}")
             else:
                 print("Failed to load help content")
 
